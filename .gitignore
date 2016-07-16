@@ -1,0 +1,6 @@
+software/moonlamp/.settings
+software/.metadata
+*.o
+*.elf
+*.hex
+

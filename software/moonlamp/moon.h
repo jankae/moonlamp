@@ -118,11 +118,17 @@ void moon_SetElementsLeft(uint8_t elements);
 void moon_SetElementsRight(uint8_t elements);
 
 /**
- * \brief Updates the moon state with a given date and brightness
+ * \brief Updates the moon state with a given date
  *
  * \param date The current date
- * \param bright Brightness of the moon (0-255)
  */
-void moon_Update(struct date date, uint8_t bright);
+void moon_Update(struct date date);
+
+/**
+ * \brief Sets the intensity of the moon LEDs
+ *
+ * \param pwm 8-bit PWM (0-255)
+ */
+void moon_SetPWM(uint8_t pwm);
 
 #endif

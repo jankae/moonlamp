@@ -182,7 +182,7 @@ void moon_SetElementsRight(uint8_t elements) {
 	if (elements >= 13)
 		moon.MOON_ELEMENT1_PORT |= (1 << MOON_ELEMENT1_PIN);
 }
-void moon_Update(struct date date, uint8_t bright) {
+void moon_Update(struct date date) {
 	int8_t moonstate = moon_calculateState(date);
 	uint8_t elements;
 	if (moonstate < 0) {
@@ -192,7 +192,10 @@ void moon_Update(struct date date, uint8_t bright) {
 		elements = moonstate / 9;
 		moon_SetElementsRight(elements);
 	}
-	moon.brightness = bright;
+}
+
+void moon_SetPWM(uint8_t pwm) {
+	moon.brightness = pwm;
 }
 
 ISR(TIMER2_OVF_vect) {

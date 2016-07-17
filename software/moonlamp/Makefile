@@ -11,6 +11,13 @@ OBJDUMP = avr-objdump
 AVRSIZE = avr-size
 AVRDUDE = avrdude
 
+SECOND = $(shell date +%S)
+MINUTE = $(shell date +%M)
+HOUR = $(shell date +%H)
+DAY = $(shell date +%d)
+MONTH = $(shell date +%m)
+YEAR = $(shell date +%Y)
+
 ##########------------------------------------------------------##########
 ##########                   Makefile Magic!                    ##########
 ##########         Summary:                                     ##########
@@ -31,8 +38,16 @@ OBJECTS=$(SOURCES:.c=.o)
 HEADERS=$(SOURCES:.c=.h)
 
 ## Compilation options, type man avr-gcc if you're curious.
-CPPFLAGS = -DF_CPU=$(F_CPU)
-CFLAGS = -Os -g -std=gnu99 -Wall
+CFLAGS = -Os -g -std=gnu99 -Wall -DF_CPU=$(F_CPU)
+
+## Add current date and time
+CFLAGS += -DCOMPILE_SECOND=$(SECOND)
+CFLAGS += -DCOMPILE_MINUTE=$(MINUTE)
+CFLAGS += -DCOMPILE_HOUR=$(HOUR)
+CFLAGS += -DCOMPILE_DAY=$(DAY)
+CFLAGS += -DCOMPILE_MONTH=$(MONTH)
+CFLAGS += -DCOMPILE_YEAR=$(YEAR)
+
 ## Use short (8-bit) data types 
 CFLAGS += -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums 
 ## Splits up object files per function
@@ -52,7 +67,7 @@ all: $(TARGET).hex
 
 ##  To make .o files from .c files 
 %.o: %.c $(HEADERS) Makefile
-	 $(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c -o $@ $<;
+	 $(CC) $(CFLAGS) $(TARGET_ARCH) -c -o $@ $<;
 
 $(TARGET).elf: $(OBJECTS)
 	$(CC) $(LDFLAGS) $(TARGET_ARCH) $^ $(LDLIBS) -o $@
@@ -75,5 +90,10 @@ clean:
 	$(TARGET).lss $(TARGET).sym $(TARGET).map $(TARGET)~ \
 	$(TARGET).eeprom $(OBJECTS)
 
-flash: $(TARGET).hex
+flash: clean $(TARGET).hex 
+	@echo
+	@echo Recompile has been forced to use current date + time in build
+	@echo
+	$(AVRSIZE) -C --mcu=$(MCU) $(TARGET).elf
+	@echo Calling avrdude to flash the firmware...
 	$(AVRDUDE) -c $(PROGRAMMER_TYPE) -p $(MCU) $(PROGRAMMER_ARGS) -U flash:w:$<

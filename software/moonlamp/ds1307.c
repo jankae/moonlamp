@@ -1,6 +1,6 @@
 #include "ds1307.h"
 
-void set_time(struct time time) {
+void DS1307_setTime(struct time time) {
 	uint8_t bcdhour = ((time.hour / 10) << 4) + (time.hour % 10);
 	uint8_t bcdminute = ((time.minute / 10) << 4) + (time.minute % 10);
 	uint8_t bcdsecond = ((time.second / 10) << 4) + (time.second % 10);
@@ -14,7 +14,7 @@ void set_time(struct time time) {
 	i2c_stop();
 }
 
-void set_date(struct date date) {
+void DS1307_setDate(struct date date) {
 	uint8_t bcddate = ((date.day / 10) << 4) + (date.day % 10);
 	uint8_t bcdmonth = ((date.month / 10) << 4) + (date.month % 10);
 	uint8_t bcdyear = ((date.year / 10) << 4) + (date.year % 10);
@@ -28,7 +28,7 @@ void set_date(struct date date) {
 	i2c_stop();
 }
 
-void get_time(struct time *time) {
+void DS1307_getTime(struct time *time) {
 	//set register pointer
 	i2c_start();
 	i2c_address(DS1307_SLAVE, I2C_WRITE);
@@ -48,7 +48,7 @@ void get_time(struct time *time) {
 	time->hour = (hour & 0x0F) + 10 * (hour >> 4);
 }
 
-void get_date(struct date *date) {
+void DS1307_getDate(struct date *date) {
 	//set register pointer
 	i2c_start();
 	i2c_address(DS1307_SLAVE, I2C_WRITE);

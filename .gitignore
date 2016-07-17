@@ -3,4 +3,4 @@ software/.metadata
 *.o
 *.elf
 *.hex
-
+*.map

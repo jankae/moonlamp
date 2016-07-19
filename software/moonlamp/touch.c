@@ -21,15 +21,16 @@ uint8_t touch_Tapped(void) {
 	return ret;
 }
 
-uint8_t touch_Holding(void){
+uint8_t touch_Holding(void) {
 	return touch.holding;
 }
 
 ISR(TIMER1_COMPA_vect) {
-	// Set PORTD6 low
-	DDRD |= (1 << PD6);
+	// Set PORTB0 low
+	DDRB |= (1 << PB0);
 	// store captured time
-	touch.CaptureValue = ICR1;
+	touch.CaptureValue -= touch.CaptureValue / 16;
+	touch.CaptureValue += ICR1;
 	// evaluate result
 	if (touch.CaptureValue > touch.threshold + TOUCH_HYSTERESIS) {
 		touch.touching = 1;
@@ -50,6 +51,6 @@ ISR(TIMER1_COMPA_vect) {
 }
 
 ISR(TIMER1_OVF_vect) {
-	// configure PORTD6 as input
-	DDRD &= ~(1 << PD6);
+	// configure PORTB0 as input
+	DDRB &= ~(1 << PB0);
 }

@@ -5,7 +5,7 @@
 #include <avr/interrupt.h>
 
 struct {
-	uint16_t ms;
+	volatile uint16_t ms;
 } time;
 
 /**

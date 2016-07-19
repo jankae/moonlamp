@@ -86,11 +86,6 @@ int main(void) {
 		/*********************************
 		 * Step 1: Evaluate touch control
 		 ********************************/
-		cli();
-		uint16_t val = touch.CaptureValue;
-		sei();
-		uart_putInteger(val);
-		uart_putc('\n');
 		if (touch_Tapped()) {
 			on = !on;
 		} else if (touch_Holding()) {

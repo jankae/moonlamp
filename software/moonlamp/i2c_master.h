@@ -2,6 +2,7 @@
 #define I2C_MASTER_H_
 
 #include <avr/io.h>
+#include "systime.h"
 
 #define I2C_READ 1
 #define I2C_WRITE 0

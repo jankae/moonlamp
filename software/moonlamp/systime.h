@@ -24,14 +24,16 @@ void time_WaitMs(uint16_t ms);
  * \brief Sets a timeout which can be checked later
  *
  * \param ms Time in milliseconds after which the timeout should elapse
+ * \return timeout
  */
-void time_SetTimeout(uint16_t ms);
+uint16_t time_SetTimeout(uint16_t ms);
 
 /**
  * \brief Checks whether a timeout has elapsed
  *
+ * \param timeout Timeout that will be checked
  * \return 1 if timeout has elapsed, 0 otherwise
  */
-uint8_t time_TimeoutElapsed(void);
+uint8_t time_TimeoutElapsed(uint16_t timeout);
 
 #endif

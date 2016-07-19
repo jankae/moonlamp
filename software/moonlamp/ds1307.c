@@ -1,5 +1,15 @@
 #include "ds1307.h"
 
+void DS1307_Init(void){
+	i2c_start();
+	i2c_address(DS1307_SLAVE, I2C_WRITE);
+	// access control register
+	i2c_write_byte(0x07);
+	// no square wave output
+	i2c_write_byte(0);
+	i2c_stop();
+}
+
 void DS1307_setTime(struct time time) {
 	uint8_t bcdhour = ((time.hour / 10) << 4) + (time.hour % 10);
 	uint8_t bcdminute = ((time.minute / 10) << 4) + (time.minute % 10);

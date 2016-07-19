@@ -13,6 +13,8 @@ int main(void) {
 	touch_Init();
 	sei();
 
+	DS1307_Init();
+
 	uart_puts("moonlamp V0.9 start\n");
 	struct date date;
 	struct time time;
@@ -87,10 +89,12 @@ int main(void) {
 
 	moon_Update(date);
 
-	uint8_t brightness = 0;
+	uint8_t brightness = 1;
 	uint8_t oldDay;
 	uint8_t on = 1;
 	uint8_t increasingBrightness = 1;
+	uint8_t holding = 0;
+	uint16_t changeTimeout;
 	while (1) {
 		time_WaitMs(50);
 		/*********************************
@@ -108,9 +112,9 @@ int main(void) {
 				uart_puts("Moonlamp on\n");
 				on = 1;
 			}
-			if (time_TimeoutElapsed()) {
+			if (!holding || time_TimeoutElapsed(changeTimeout)) {
 				// only change brightness every 200ms
-				time_SetTimeout(200);
+				changeTimeout = time_SetTimeout(200);
 				// sweep brightness
 				if (increasingBrightness) {
 					if (brightness < 16) {
@@ -125,10 +129,13 @@ int main(void) {
 						increasingBrightness = 1;
 					}
 				}
+				holding = 1;
 				uart_puts("New brightness: ");
 				uart_putInteger(brightness);
 				uart_putc('\n');
 			}
+		} else {
+			holding = 0;
 		}
 		/*********************************
 		 * Step 2: get current date

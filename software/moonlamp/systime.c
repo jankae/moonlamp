@@ -11,27 +11,28 @@ void time_Init() {
 	TIMSK0 |= (1 << OCIE0A);
 }
 void time_WaitMs(uint16_t ms) {
-	time_SetTimeout(ms);
-	while (!time_TimeoutElapsed())
+	uint16_t timeout = time_SetTimeout(ms);
+	while (!time_TimeoutElapsed(timeout))
 		;
 }
-void time_SetTimeout(uint16_t ms) {
+uint16_t time_SetTimeout(uint16_t ms) {
+	uint16_t timeout;
 	cli();
-	time.ms = ms;
+	timeout = time.ms;
 	sei();
+	timeout += ms;
+	return timeout;
 }
-uint8_t time_TimeoutElapsed(void) {
-	uint8_t ret = 0;
+uint8_t time_TimeoutElapsed(uint16_t timeout) {
+	uint8_t ret = 1;
 	cli();
-	if (!time.ms) {
-		ret = 1;
-	}
+	uint16_t timebuf = time.ms;
 	sei();
+	if (timebuf - timeout & 0x8000)
+		ret = 0;
 	return ret;
 }
 
 ISR(TIMER0_COMPA_vect) {
-	if (time.ms) {
-		time.ms--;
-	}
+	time.ms++;
 }

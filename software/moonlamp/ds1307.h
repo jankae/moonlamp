@@ -7,6 +7,8 @@
 
 #define DS1307_SLAVE 0x68
 
+void DS1307_Init(void);
+
 void DS1307_setTime(struct time time);
 void DS1307_setDate(struct date date);
 void DS1307_getTime(struct time *time);

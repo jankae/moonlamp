@@ -299,6 +299,11 @@ void moon_Update(struct date date) {
 
 void moon_SetPWM(uint8_t pwm) {
 	moon.brightness = pwm;
+	if (moon.brightness < 128) {
+		OCR2A = 255 - moon.brightness;
+	} else {
+		OCR2A = moon.brightness;
+	}
 }
 
 void moon_Error(uint8_t blink) {
@@ -323,15 +328,24 @@ void moon_Error(uint8_t blink) {
 }
 
 ISR(TIMER2_OVF_vect) {
-	if (moon.brightness > 0) {
+	if (moon.brightness > 0 && moon.brightness >= 128) {
 		PORTB |= moon.MaskPORTB;
 		PORTC |= moon.MaskPORTC;
 		PORTD |= moon.MaskPORTD;
+	} else {
+		PORTB &= moon.OffPORTB;
+		PORTC &= moon.OffPORTC;
+		PORTD &= moon.OffPORTD;
 	}
-	OCR2A = moon.brightness;
 }
 ISR(TIMER2_COMPA_vect) {
-	PORTB &= moon.OffPORTB;
-	PORTC &= moon.OffPORTC;
-	PORTD &= moon.OffPORTD;
+	if (moon.brightness > 0 && moon.brightness < 128) {
+		PORTB |= moon.MaskPORTB;
+		PORTC |= moon.MaskPORTC;
+		PORTD |= moon.MaskPORTD;
+	} else {
+		PORTB &= moon.OffPORTB;
+		PORTC &= moon.OffPORTC;
+		PORTD &= moon.OffPORTD;
+	}
 }

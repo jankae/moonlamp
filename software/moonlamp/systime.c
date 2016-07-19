@@ -28,7 +28,7 @@ uint8_t time_TimeoutElapsed(uint16_t timeout) {
 	cli();
 	uint16_t timebuf = time.ms;
 	sei();
-	if (timebuf - timeout & 0x8000)
+	if ((timebuf - timeout) & 0x8000)
 		ret = 0;
 	return ret;
 }

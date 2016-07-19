@@ -142,11 +142,22 @@ int main(void) {
 		 ********************************/
 		oldDay = date.day;
 		DS1307_getDate(&date);
-		/*********************************
-		 * Step 3: Update moon state
-		 ********************************/
-		if (oldDay != date.day) {
-			moon_Update(date);
+		struct date date2;
+		DS1307_getDate(&date2);
+		if (date.day == date2.day && date.month == date2.month
+				&& date.year == date2.year) {
+			// both dates are the same
+			// -> probably no I2C transmission error
+			if (date.day >= 1 && date.day <= 31 && date.month >= 1
+					&& date.month <= 12 && date.year >= 16 && date.year <= 99) {
+				// date seems to be valid
+				/*********************************
+				 * Step 3: Update moon state
+				 ********************************/
+				if (oldDay != date.day) {
+					moon_Update(date);
+				}
+			}
 		}
 		/*********************************
 		 * Step 4: Set moon PWM

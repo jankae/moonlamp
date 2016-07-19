@@ -166,7 +166,7 @@ int8_t moon_calculateState(struct date date) {
 	struct date lastFullMoon;
 	struct date nextFullMoon;
 	int8_t daysSinceFull, daysUntilFull;
-	uint8_t i = 0;
+	uint16_t i = 0;
 	int8_t moonstate = 0;
 	uart_puts("Calculating moon state for ");
 	uart_putDate(date);

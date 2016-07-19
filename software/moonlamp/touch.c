@@ -3,9 +3,10 @@
 void touch_Init(void) {
 	touch.threshold = TOUCH_DEF_THRESHOLD;
 	// fastest prescaler, capture on rising edge
-	TCCR1B |= (1 << CS10);
+	TCCR1B |= (1 << CS10) | (1 << WGM12);
+	OCR1A = (uint16_t) 5000;
 	// enable interrupts
-	TIMSK1 |= (1 << TOIE1);
+	TIMSK1 |= (1 << OCIE1A);
 
 	// ADC initialization
 	// select AVCC as reference + GND as ADC input
@@ -15,9 +16,6 @@ void touch_Init(void) {
 
 	// charge capacitor from touch pin to ground
 	PORTC |= (1 << PC0);
-
-	touch.stableTimer = time_SetTimeout(2000);
-	touch.stableValue = 0;
 }
 
 uint8_t touch_Tapped(void) {
@@ -36,7 +34,7 @@ uint8_t touch_Holding(void) {
 	return touch.holding;
 }
 
-ISR(TIMER1_OVF_vect) {
+ISR(TIMER1_COMPA_vect) {
 	// disable pull-up on touch pin
 	PORTC &= ~(1 << PC0);
 	// select channel 0 (PC0)
@@ -46,40 +44,40 @@ ISR(TIMER1_OVF_vect) {
 }
 
 ISR(ADC_vect) {
+	touch.lastValue = touch.CaptureValue;
 	touch.CaptureValue = ADC;
 	// switch ADC input to ground again (discharge sampling capacitor)
 	ADMUX = (1 << REFS0) | 0x0F;
 	// enable pull-up on touch pin
 	PORTC |= (1 << PC0);
+	uint16_t diff;
+	if (touch.lastValue > touch.CaptureValue)
+		diff = touch.lastValue - touch.CaptureValue;
+	else
+		diff = touch.CaptureValue - touch.lastValue;
+	if (touch.CaptureValue > TOUCH_DEF_THRESHOLD || diff > TOUCH_DIFF_THRESHOLD) {
+		if (touch.touchIndicator < 10)
+			touch.touchIndicator++;
+	} else if (touch.touchIndicator) {
+		touch.touchIndicator--;
+	}
 	// evaluate result
-	if (touch.CaptureValue > touch.threshold + TOUCH_HYSTERESIS) {
+	if (touch.touchIndicator >= 5) {
 		touch.touching = 1;
 		touch.count++;
-		if (touch.count >= 8) {
+		if (touch.count >= 100) {
 			// has been continuously touched for some time
 			touch.holding = 1;
+			touch.count = 100;
 		}
-	} else if (touch.touching
-			&& touch.CaptureValue < touch.threshold - TOUCH_HYSTERESIS) {
+	} else if (touch.touching) {
 		touch.touching = 0;
 		touch.holding = 0;
-		if (touch.count < 8) {
+		if (touch.count < 100) {
 			// has been touched for a reasonable short time
 			touch.tapped = 1;
 		}
 		touch.count = 0;
-	}
-	// track threshold
-	if ((touch.CaptureValue > touch.stableValue + TOUCH_HYSTERESIS)
-			|| (touch.CaptureValue < touch.stableValue - TOUCH_HYSTERESIS)) {
-		touch.stableValue = touch.CaptureValue;
-		touch.stableTimer = time_SetTimeout(2000);
-	}
-	if (time_TimeoutElapsed(touch.stableTimer)) {
-		// touch capacity hasn't change much lately
-		// -> most likely not touched at the moment
-		// -> use current value as new threshold
-		touch.threshold = touch.stableValue + 2 * TOUCH_HYSTERESIS;
 	}
 }
 

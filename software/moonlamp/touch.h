@@ -5,8 +5,8 @@
 #include <avr/interrupt.h>
 #include "systime.h"
 
-#define TOUCH_DEF_THRESHOLD		500
-#define TOUCH_HYSTERESIS		20
+#define TOUCH_DEF_THRESHOLD		900
+#define TOUCH_DIFF_THRESHOLD	50
 
 struct {
 	uint16_t CaptureValue;
@@ -17,8 +17,8 @@ struct {
 	// device is being touched for a longer time (>0.5s)
 	uint8_t holding;
 
-	uint16_t stableTimer;
-	uint16_t stableValue;
+	uint8_t touchIndicator;
+	uint16_t lastValue;
 
 	uint16_t threshold;
 	uint16_t count;

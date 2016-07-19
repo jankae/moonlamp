@@ -9,7 +9,7 @@ uint8_t daysinmonth[13] = { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
  * http://home.hiwaay.net/~krcool/Astro/moon/fullmoon.htm
  */
 struct date fullMoon[] = { { 24, 1, 16 }, { 22, 2, 16 }, { 23, 3, 16 }, { 22, 4,
-		16 }, { 21, 5, 16 }, { 20, 6, 16 }, { 19, 7, 16 }, { 18, 8, 16 }, { 16,
+		16 }, { 21, 5, 16 }, { 20, 6, 16 }, { 20, 7, 16 }, { 18, 8, 16 }, { 16,
 		9, 16 }, { 16, 10, 16 }, { 14, 11, 16 }, { 14, 12, 16 }, { 12, 1, 17 },
 		{ 11, 2, 17 }, { 12, 3, 17 }, { 11, 4, 17 }, { 10, 5, 17 },
 		{ 9, 6, 17 }, { 9, 7, 17 }, { 7, 8, 17 }, { 6, 9, 17 }, { 5, 10, 17 }, {
@@ -168,6 +168,10 @@ int8_t moon_calculateState(struct date date) {
 	struct date nextFullMoon;
 	int8_t daysSinceFull, daysUntilFull;
 	uint8_t i = 0;
+	int8_t moonstate = 0;
+	uart_puts("Calculating moon state for ");
+	uart_putDate(date);
+	uart_putc('\n');
 	// step through full moon dates until we pass the current date
 	while (date.year > fullMoon[i].year
 			|| (date.year == fullMoon[i].year && date.month > fullMoon[i].month)
@@ -176,6 +180,7 @@ int8_t moon_calculateState(struct date date) {
 		i++;
 		if (i >= sizeof(fullMoon) / sizeof(struct date)) {
 			// passed the last saved full moon
+			uart_puts("Last full moon date is too old\n");
 			moon.error = 1;
 			return 128;
 		}
@@ -183,17 +188,35 @@ int8_t moon_calculateState(struct date date) {
 	if (date.day == fullMoon[i].day && date.month == fullMoon[i].month
 			&& date.year == fullMoon[i].year) {
 		// today is a full moon day
-		return 128;
+		uart_puts("Today is a full moon\n");
+		moonstate = -128;
+	} else {
+		// save last and next full moon
+		lastFullMoon = fullMoon[i - 1];
+		nextFullMoon = fullMoon[i];
+
+		uart_puts("Last full moon on: ");
+		uart_putDate(lastFullMoon);
+		uart_puts("\nNext full moon on: ");
+		uart_putDate(nextFullMoon);
+
+		daysSinceFull = moon_DaysBetweenDates(lastFullMoon, date);
+		daysUntilFull = moon_DaysBetweenDates(date, nextFullMoon);
+
+		uart_puts("\nDays since full moon: ");
+		uart_putInteger(daysSinceFull);
+		uart_puts("\nDays until next full moon: ");
+		uart_putInteger(daysUntilFull);
+		uart_putc('\n');
+
+		moonstate = ((daysSinceFull - daysUntilFull) * 128)
+				/ (daysSinceFull + daysUntilFull);
 	}
-	// save last and next full moon
-	lastFullMoon = fullMoon[i - 1];
-	nextFullMoon = fullMoon[i];
+	uart_puts("Current moonstate: ");
+	uart_putInteger(moonstate);
+	uart_putc('\n');
 
-	daysSinceFull = moon_DaysBetweenDates(lastFullMoon, date);
-	daysUntilFull = moon_DaysBetweenDates(date, nextFullMoon);
-
-	return ((daysSinceFull - daysUntilFull) * 128)
-			/ (daysSinceFull + daysUntilFull);
+	return moonstate;
 }
 
 void moon_SetElementsLeft(uint8_t elements) {
@@ -226,6 +249,9 @@ void moon_SetElementsLeft(uint8_t elements) {
 		moon.MOON_ELEMENT12_PORT |= (1 << MOON_ELEMENT12_PIN);
 	if (elements >= 13)
 		moon.MOON_ELEMENT13_PORT |= (1 << MOON_ELEMENT13_PIN);
+	uart_puts("Illuminating ");
+	uart_putInteger(elements);
+	uart_puts(" elements from the left\n");
 }
 void moon_SetElementsRight(uint8_t elements) {
 	moon.MaskPORTB = 0;
@@ -257,15 +283,18 @@ void moon_SetElementsRight(uint8_t elements) {
 		moon.MOON_ELEMENT2_PORT |= (1 << MOON_ELEMENT2_PIN);
 	if (elements >= 13)
 		moon.MOON_ELEMENT1_PORT |= (1 << MOON_ELEMENT1_PIN);
+	uart_puts("Illuminating ");
+	uart_putInteger(elements);
+	uart_puts(" elements from the right\n");
 }
 void moon_Update(struct date date) {
 	int8_t moonstate = moon_calculateState(date);
 	uint8_t elements;
 	if (moonstate < 0) {
-		elements = -moonstate / 9;
+		elements = -(int16_t) moonstate * MOON_NUM_ELEMENTS / 128;
 		moon_SetElementsLeft(elements);
 	} else {
-		elements = moonstate / 9;
+		elements = (int16_t) moonstate * MOON_NUM_ELEMENTS / 128;
 		moon_SetElementsRight(elements);
 	}
 }

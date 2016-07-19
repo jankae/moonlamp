@@ -7,10 +7,19 @@
 #include "touch.h"
 
 int main(void) {
+	time_Init();
+	uart_init();
+	i2c_init();
+	touch_Init();
+	uart_puts("moonlamp V0.9 start\n");
 	struct date date;
 	struct time time;
 	eeprom_Read(&date, &time);
 
+	uart_puts("EEPROM date/time: ");
+	uart_putDate(date);
+	uart_putc('/');
+	uart_putTime(time);
 	// compare EEPROM time with compile time
 	if ((date.day != COMPILE_DAY) || (date.month != COMPILE_MONTH)
 			|| (date.year != (COMPILE_YEAR - 2000))
@@ -24,17 +33,33 @@ int main(void) {
 		time.second = COMPILE_SECOND;
 		time.minute = COMPILE_MINUTE;
 		time.hour = COMPILE_HOUR;
+		uart_puts("\nEEPROM doesn't match compile time:\n");
+		uart_puts("Compile date/time: ");
+		uart_putDate(date);
+		uart_putc('/');
+		uart_putTime(time);
 		// set RTC
+		uart_puts("\nSetting RTC...\n");
 		DS1307_setTime(time);
 		DS1307_setDate(date);
 		// save in EEPROM
+		uart_puts("Updating EEPROM...\n");
 		eeprom_Write(date, time);
+	} else {
+		uart_puts("\nEEPROM matches compile time\n");
 	}
 	// at this point the RTC has either just been set or still contains a valid
 	// time and date (device hasn't been flashed before current start-up)
+	DS1307_getDate(&date);
+	DS1307_getTime(&time);
+	uart_puts("RTC date/time: ");
+	uart_putDate(date);
+	uart_putc('/');
+	uart_putTime(time);
+	uart_putc('\n');
 
 	moon_init();
-
+	sei();
 	// light up moon once to show device is working (it might be new moon)
 	// activate all elements
 	moon_SetElementsLeft(13);
@@ -61,6 +86,11 @@ int main(void) {
 		/*********************************
 		 * Step 1: Evaluate touch control
 		 ********************************/
+		cli();
+		uint16_t val = touch.CaptureValue;
+		sei();
+		uart_putInteger(val);
+		uart_putc('\n');
 		if (touch_Tapped()) {
 			on = !on;
 		} else if (touch_Holding()) {

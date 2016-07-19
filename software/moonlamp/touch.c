@@ -15,6 +15,9 @@ void touch_Init(void) {
 
 	// charge capacitor from touch pin to ground
 	PORTC |= (1 << PC0);
+
+	touch.stableTimer = time_SetTimeout(2000);
+	touch.stableValue = 0;
 }
 
 uint8_t touch_Tapped(void) {
@@ -65,6 +68,18 @@ ISR(ADC_vect) {
 			touch.tapped = 1;
 		}
 		touch.count = 0;
+	}
+	// track threshold
+	if ((touch.CaptureValue > touch.stableValue + TOUCH_HYSTERESIS)
+			|| (touch.CaptureValue < touch.stableValue - TOUCH_HYSTERESIS)) {
+		touch.stableValue = touch.CaptureValue;
+		touch.stableTimer = time_SetTimeout(2000);
+	}
+	if (time_TimeoutElapsed(touch.stableTimer)) {
+		// touch capacity hasn't change much lately
+		// -> most likely not touched at the moment
+		// -> use current value as new threshold
+		touch.threshold = touch.stableValue + 2 * TOUCH_HYSTERESIS;
 	}
 }
 

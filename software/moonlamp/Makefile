@@ -42,7 +42,7 @@ OBJECTS=$(SOURCES:.c=.o)
 HEADERS=$(SOURCES:.c=.h)
 
 ## Compilation options, type man avr-gcc if you're curious.
-CFLAGS = -Os -g -std=gnu99 -Wall -DF_CPU=$(F_CPU)
+CFLAGS = -Os -g -std=gnu99 -Wall -Wextra -DF_CPU=$(F_CPU)
 
 ## Add current date and time
 CFLAGS += -DCOMPILE_SECOND=$(SECOND)

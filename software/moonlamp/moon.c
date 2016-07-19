@@ -120,9 +120,8 @@ void moon_init(void) {
 	moon.MaskPORTD = 0;
 
 	moon.brightness = 0;
-	moon.error = 0;
 
-	TCCR2A |= (1 << CS21);
+	TCCR2B |= (1 << CS21);
 	TIMSK2 |= (1 << TOIE2) | (1 << OCIE2A);
 }
 
@@ -180,9 +179,8 @@ int8_t moon_calculateState(struct date date) {
 		i++;
 		if (i >= sizeof(fullMoon) / sizeof(struct date)) {
 			// passed the last saved full moon
-			uart_puts("Last full moon date is too old\n");
-			moon.error = 1;
-			return 128;
+			uart_puts("ERROR: Last full moon date is too old\n");
+			moon_Error(1);
 		}
 	}
 	if (date.day == fullMoon[i].day && date.month == fullMoon[i].month
@@ -303,6 +301,27 @@ void moon_SetPWM(uint8_t pwm) {
 	moon.brightness = pwm;
 }
 
+void moon_Error(uint8_t blink) {
+	if (blink > 0) {
+		// illuminate the whole moon
+		moon_SetElementsLeft(MOON_NUM_ELEMENTS);
+		// set blink code
+		while (1) {
+			uint8_t i;
+			for (i = 0; i < blink; i++) {
+				moon_SetPWM(255);
+				time_WaitMs(200);
+				moon_SetPWM(0);
+				time_WaitMs(200);
+			}
+			uart_puts("Error: ");
+			uart_putInteger(blink);
+			uart_putc('\n');
+			time_WaitMs(1000);
+		}
+	}
+}
+
 ISR(TIMER2_OVF_vect) {
 	if (moon.brightness > 0) {
 		PORTB |= moon.MaskPORTB;
@@ -313,6 +332,6 @@ ISR(TIMER2_OVF_vect) {
 }
 ISR(TIMER2_COMPA_vect) {
 	PORTB &= moon.OffPORTB;
-	PORTC &= moon.OffPORTB;
-	PORTD &= moon.OffPORTB;
+	PORTC &= moon.OffPORTC;
+	PORTD &= moon.OffPORTD;
 }

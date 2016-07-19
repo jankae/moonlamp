@@ -5,6 +5,7 @@
 #include <avr/interrupt.h>
 #include "uart.h"
 #include "dates.h"
+#include "systime.h"
 
 /*
  * Bits  7   6   5   4   3   2   1   0
@@ -74,7 +75,6 @@ struct {
 	uint8_t OffPORTC;
 	uint8_t OffPORTD;
 	uint8_t brightness;
-	uint8_t error;
 } moon;
 
 /**
@@ -130,5 +130,7 @@ void moon_Update(struct date date);
  * \param pwm 8-bit PWM (0-255)
  */
 void moon_SetPWM(uint8_t pwm);
+
+void moon_Error(uint8_t blink);
 
 #endif

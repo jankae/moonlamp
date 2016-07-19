@@ -11,12 +11,16 @@ OBJDUMP = avr-objdump
 AVRSIZE = avr-size
 AVRDUDE = avrdude
 
-SECOND = $(shell date +%S)
-MINUTE = $(shell date +%M)
-HOUR = $(shell date +%H)
-DAY = $(shell date +%d)
-MONTH = $(shell date +%m)
-YEAR = $(shell date +%Y)
+SECOND = $(shell date +%-S)
+MINUTE = $(shell date +%-M)
+HOUR = $(shell date +%-H)
+DAY = $(shell date +%-d)
+MONTH = $(shell date +%-m)
+YEAR = $(shell date +%-Y)
+
+EFUSE = 0x07
+HFUSE = 0xD1
+LFUSE = 0x62
 
 ##########------------------------------------------------------##########
 ##########                   Makefile Magic!                    ##########
@@ -96,4 +100,11 @@ flash: clean $(TARGET).hex
 	@echo
 	$(AVRSIZE) -C --mcu=$(MCU) $(TARGET).elf
 	@echo Calling avrdude to flash the firmware...
-	$(AVRDUDE) -c $(PROGRAMMER_TYPE) -p $(MCU) $(PROGRAMMER_ARGS) -U flash:w:$<
+	$(AVRDUDE) -c $(PROGRAMMER_TYPE) -p $(MCU) $(PROGRAMMER_ARGS) -U flash:w:$(TARGET).hex
+
+fuses:
+	$(AVRDUDE) -c $(PROGRAMMER_TYPE) -p $(MCU) $(PROGRAMMER_ARGS) -u -U efuse:w:$(EFUSE):m -U hfuse:w:$(HFUSE):m -U lfuse:w:$(LFUSE):m
+
+reset:
+	$(AVRDUDE) -c $(PROGRAMMER_TYPE) -p $(MCU) $(PROGRAMMER_ARGS)
+

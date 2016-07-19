@@ -11,6 +11,8 @@ int main(void) {
 	uart_init();
 	i2c_init();
 	touch_Init();
+	sei();
+
 	uart_puts("moonlamp V0.9 start\n");
 	struct date date;
 	struct time time;
@@ -59,7 +61,7 @@ int main(void) {
 	uart_putc('\n');
 
 	moon_init();
-	sei();
+
 	// light up moon once to show device is working (it might be new moon)
 	// activate all elements
 	moon_SetElementsLeft(13);
@@ -75,6 +77,14 @@ int main(void) {
 		time_WaitMs(50);
 	}
 	moon_SetPWM(0);
+
+	// sanity check for RTC
+	if (date.year < 16) {
+		// can't be right, year must be at least 2016
+		uart_puts("ERROR: RTC invalid\n");
+		moon_Error(2);
+	}
+
 	moon_Update(date);
 
 	uint8_t brightness = 0;
@@ -88,7 +98,16 @@ int main(void) {
 		 ********************************/
 		if (touch_Tapped()) {
 			on = !on;
+			if (on) {
+				uart_puts("Moonlamp on\n");
+			} else {
+				uart_puts("Moonlamp off\n");
+			}
 		} else if (touch_Holding()) {
+			if (!on) {
+				uart_puts("Moonlamp on\n");
+				on = 1;
+			}
 			if (time_TimeoutElapsed()) {
 				// only change brightness every 200ms
 				time_SetTimeout(200);
@@ -106,6 +125,9 @@ int main(void) {
 						increasingBrightness = 1;
 					}
 				}
+				uart_puts("New brightness: ");
+				uart_putInteger(brightness);
+				uart_putc('\n');
 			}
 		}
 		/*********************************

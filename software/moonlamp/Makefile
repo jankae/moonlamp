@@ -1,5 +1,5 @@
 MCU = atmega328p
-F_CPU = 1000000UL
+F_CPU = 8000000UL
 
 PROGRAMMER_TYPE = avrispmkII
 # extra arguments to avrdude: baud rate, chip type, -F flag, etc.
@@ -20,7 +20,7 @@ YEAR = $(shell date +%-Y)
 
 EFUSE = 0x07
 HFUSE = 0xD1
-LFUSE = 0x62
+LFUSE = 0xE2
 
 ##########------------------------------------------------------##########
 ##########                   Makefile Magic!                    ##########

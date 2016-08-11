@@ -68,13 +68,13 @@ int main(void) {
 	// activate all elements
 	moon_SetElementsLeft(13);
 	uint8_t i;
-	for (i = 0; i < 16; i++) {
+	for (i = 0; i < 10; i++) {
 		moon_SetPWM(i * i);
 		time_WaitMs(50);
 	}
 	moon_SetPWM(255);
 	time_WaitMs(50);
-	for (i = 15; i > 0; i--) {
+	for (i = 9; i > 0; i--) {
 		moon_SetPWM(i * i);
 		time_WaitMs(50);
 	}
@@ -89,14 +89,16 @@ int main(void) {
 
 	moon_Update(date);
 
-	uint8_t brightness = 1;
+	uint8_t brightness = 5;
 	uint8_t oldDay;
 	uint8_t on = 1;
 	uint8_t increasingBrightness = 1;
 	uint8_t holding = 0;
 	uint16_t changeTimeout;
+	uint16_t timeUpdateTimeout = time_SetTimeout(10000);
 	while (1) {
-		time_WaitMs(50);
+		time_WaitMs(5);
+		touch_Update();
 		/*********************************
 		 * Step 1: Evaluate touch control
 		 ********************************/
@@ -117,7 +119,7 @@ int main(void) {
 				changeTimeout = time_SetTimeout(200);
 				// sweep brightness
 				if (increasingBrightness) {
-					if (brightness < 16) {
+					if (brightness < 10) {
 						brightness++;
 					} else {
 						increasingBrightness = 0;
@@ -140,22 +142,26 @@ int main(void) {
 		/*********************************
 		 * Step 2: get current date
 		 ********************************/
-		oldDay = date.day;
-		DS1307_getDate(&date);
-		struct date date2;
-		DS1307_getDate(&date2);
-		if (date.day == date2.day && date.month == date2.month
-				&& date.year == date2.year) {
-			// both dates are the same
-			// -> probably no I2C transmission error
-			if (date.day >= 1 && date.day <= 31 && date.month >= 1
-					&& date.month <= 12 && date.year >= 16 && date.year <= 99) {
-				// date seems to be valid
-				/*********************************
-				 * Step 3: Update moon state
-				 ********************************/
-				if (oldDay != date.day) {
-					moon_Update(date);
+		if (time_TimeoutElapsed(timeUpdateTimeout)) {
+			oldDay = date.day;
+			DS1307_getDate(&date);
+			struct date date2;
+			DS1307_getDate(&date2);
+			if (date.day == date2.day && date.month == date2.month
+					&& date.year == date2.year) {
+				// both dates are the same
+				// -> probably no I2C transmission error
+				if (date.day >= 1 && date.day <= 31 && date.month >= 1
+						&& date.month <= 12 && date.year >= 16
+						&& date.year <= 99) {
+					// date seems to be valid
+					/*********************************
+					 * Step 3: Update moon state
+					 ********************************/
+					if (oldDay != date.day) {
+						moon_Update(date);
+					}
+					timeUpdateTimeout = time_SetTimeout(10000);
 				}
 			}
 		}

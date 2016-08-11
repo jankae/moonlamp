@@ -7,7 +7,7 @@ void time_Init() {
 	OCR0A = 124;
 	// prescaler = 8
 	// -> overflows every ms
-	TCCR0B |= (1 << CS01);
+	TCCR0B |= (1 << CS01) | (1 << CS00);
 	TIMSK0 |= (1 << OCIE0A);
 }
 void time_WaitMs(uint16_t ms) {

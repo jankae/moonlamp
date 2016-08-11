@@ -121,8 +121,8 @@ void moon_init(void) {
 
 	moon.brightness = 0;
 
-	TCCR2B |= (1 << CS21);
-	TIMSK2 |= (1 << TOIE2) | (1 << OCIE2A);
+	TCCR2B |= (1 << CS22) | (1 << CS20);
+	TIMSK2 |= (1 << TOIE2);
 }
 
 uint8_t moon_DaysBetweenDates(struct date date1, struct date date2) {
@@ -299,11 +299,6 @@ void moon_Update(struct date date) {
 
 void moon_SetPWM(uint8_t pwm) {
 	moon.brightness = pwm;
-	if (moon.brightness < 128) {
-		OCR2A = 255 - moon.brightness;
-	} else {
-		OCR2A = moon.brightness;
-	}
 }
 
 void moon_Error(uint8_t blink) {
@@ -328,24 +323,34 @@ void moon_Error(uint8_t blink) {
 }
 
 ISR(TIMER2_OVF_vect) {
-	if (moon.brightness > 0 && moon.brightness >= 128) {
+	if (moon.brightness > 0) {
 		PORTB |= moon.MaskPORTB;
 		PORTC |= moon.MaskPORTC;
 		PORTD |= moon.MaskPORTD;
-	} else {
-		PORTB &= moon.OffPORTB;
-		PORTC &= moon.OffPORTC;
-		PORTD &= moon.OffPORTD;
+		if (moon.brightness < 20) {
+			// wait for PWM cycle
+			while (TCNT2 < moon.brightness)
+//				asm volatile("NOP");
+				;
+			// switch moon off
+			PORTB &= moon.OffPORTB;
+			PORTC &= moon.OffPORTC;
+			PORTD &= moon.OffPORTD;
+		} else {
+			// PWM duty cycle is high, waiting in interrupt takes too much time
+			// -> setup compare match interrupt
+			OCR2A = moon.brightness;
+			// clear compare match flag
+			TIFR2 = (1 << OCF2A);
+			// enable interrupt
+			TIMSK2 |= (1 << OCIE2A);
+		}
 	}
 }
 ISR(TIMER2_COMPA_vect) {
-	if (moon.brightness > 0 && moon.brightness < 128) {
-		PORTB |= moon.MaskPORTB;
-		PORTC |= moon.MaskPORTC;
-		PORTD |= moon.MaskPORTD;
-	} else {
-		PORTB &= moon.OffPORTB;
-		PORTC &= moon.OffPORTC;
-		PORTD &= moon.OffPORTD;
-	}
+	// disable compare interrupt
+	TIMSK2 &= ~(1 << OCIE2A);
+	PORTB &= moon.OffPORTB;
+	PORTC &= moon.OffPORTC;
+	PORTD &= moon.OffPORTD;
 }

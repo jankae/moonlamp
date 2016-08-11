@@ -75,6 +75,7 @@ struct {
 	uint8_t OffPORTC;
 	uint8_t OffPORTD;
 	uint8_t brightness;
+	uint8_t pwmCycle;
 } moon;
 
 /**

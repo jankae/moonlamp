@@ -44,4 +44,12 @@ uint8_t touch_Tapped(void);
  */
 uint8_t touch_Holding(void);
 
+/**
+ * \brief Updates touch status.
+ *
+ * Samples the ADC and calculates whether device is being touched.
+ * Should be called approx. every 5ms
+ */
+void touch_Update(void);
+
 #endif

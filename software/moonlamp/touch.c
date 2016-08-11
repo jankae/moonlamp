@@ -2,17 +2,17 @@
 
 void touch_Init(void) {
 	touch.threshold = TOUCH_DEF_THRESHOLD;
-	// fastest prescaler, capture on rising edge
-	TCCR1B |= (1 << CS10) | (1 << WGM12);
-	OCR1A = (uint16_t) 5000;
-	// enable interrupts
-	TIMSK1 |= (1 << OCIE1A);
+//	// fastest prescaler, capture on rising edge
+//	TCCR1B |= (1 << CS10) | (1 << WGM12);
+//	OCR1A = (uint16_t) 5000;
+//	// enable interrupts
+//	TIMSK1 |= (1 << OCIE1A);
 
-	// ADC initialization
-	// select AVCC as reference + GND as ADC input
+// ADC initialization
+// select AVCC as reference + GND as ADC input
 	ADMUX = (1 << REFS0) | 0x0F;
 	// enable + prescaler = 2 -> 500kHz
-	ADCSRA |= (1 << ADEN) | (1 << ADPS0) | (1 << ADIE);
+	ADCSRA |= (1 << ADEN) | (1 << ADPS0) | (1 << ADPS2);	// | (1 << ADIE);
 
 	// charge capacitor from touch pin to ground
 	PORTC |= (1 << PC0);
@@ -34,16 +34,16 @@ uint8_t touch_Holding(void) {
 	return touch.holding;
 }
 
-ISR(TIMER1_COMPA_vect) {
+void touch_Update(void) {
 	// disable pull-up on touch pin
 	PORTC &= ~(1 << PC0);
 	// select channel 0 (PC0)
 	ADMUX = (1 << REFS0);
 	// sample ADC
 	ADCSRA |= (1 << ADSC);
-}
+	while (ADCSRA & (1 << ADSC))
+		;
 
-ISR(ADC_vect) {
 	touch.lastValue = touch.CaptureValue;
 	touch.CaptureValue = ADC;
 	// switch ADC input to ground again (discharge sampling capacitor)
@@ -80,4 +80,3 @@ ISR(ADC_vect) {
 		touch.count = 0;
 	}
 }
-

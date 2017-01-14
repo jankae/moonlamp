@@ -2,7 +2,7 @@
 
 void uart_init(void) {
 	UCSRA |= (1 << U2X);
-	UCSRB |= (1 << TXEN) | (1 << RXEN);
+	UCSRB |= (1 << TXEN);
 	UCSRC |= (3 << UCSZ0);
 
 	UBRRH = UBRR_VAL >> 8;
@@ -13,11 +13,6 @@ void uart_putc(unsigned char c) {
 		;
 
 	UDR = c;
-}
-uint8_t uart_getc(void) {
-	while (!(UCSRA & (1 << RXC)))
-		;
-	return UDR ;
 }
 void uart_puts(char *s) {
 	while (*s) {

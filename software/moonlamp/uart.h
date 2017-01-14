@@ -15,7 +15,6 @@
 
 void uart_init(void);
 void uart_putc(unsigned char c);
-uint8_t uart_getc(void);
 void uart_puts(char *s);
 
 void uart_putDate(struct date date);

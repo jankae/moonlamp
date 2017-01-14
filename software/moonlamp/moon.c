@@ -101,6 +101,7 @@ void moon_init(void) {
 
 	// build 'switch-off'-masks
 	moon.MaskPORTA = 0xFF;
+	moon.MaskPORTB = 0xFF;
 	moon.MaskPORTC = 0xFF;
 	moon.MaskPORTD = 0xFF;
 	moon.MOON_ELEMENT1_PORT &= ~(1 << MOON_ELEMENT1_PIN);
@@ -121,9 +122,11 @@ void moon_init(void) {
 	moon.MOON_ELEMENT16_PORT &= ~(1 << MOON_ELEMENT16_PIN);
 	moon.MOON_ELEMENT17_PORT &= ~(1 << MOON_ELEMENT17_PIN);
 	moon.OffPORTA = moon.MaskPORTA;
+	moon.OffPORTB = moon.MaskPORTB;
 	moon.OffPORTC = moon.MaskPORTC;
 	moon.OffPORTD = moon.MaskPORTD;
 	moon.MaskPORTA = 0;
+	moon.MaskPORTB = 0;
 	moon.MaskPORTC = 0;
 	moon.MaskPORTD = 0;
 
@@ -228,6 +231,7 @@ int8_t moon_calculateState(struct date date) {
 
 void moon_SetElementsLeft(uint8_t elements) {
 	moon.MaskPORTA = 0;
+	moon.MaskPORTB = 0;
 	moon.MaskPORTC = 0;
 	moon.MaskPORTD = 0;
 	if (elements >= 1)
@@ -270,6 +274,7 @@ void moon_SetElementsLeft(uint8_t elements) {
 }
 void moon_SetElementsRight(uint8_t elements) {
 	moon.MaskPORTA = 0;
+	moon.MaskPORTB = 0;
 	moon.MaskPORTC = 0;
 	moon.MaskPORTD = 0;
 	if (elements >= 1)
@@ -349,7 +354,8 @@ void moon_Error(uint8_t blink) {
 
 ISR(TIMER2_OVF_vect) {
 	if (moon.brightness > 0) {
-		PORTB |= moon.MaskPORTA;
+		PORTA |= moon.MaskPORTA;
+		PORTB |= moon.MaskPORTB;
 		PORTC |= moon.MaskPORTC;
 		PORTD |= moon.MaskPORTD;
 		if (moon.brightness < 20) {
@@ -358,7 +364,8 @@ ISR(TIMER2_OVF_vect) {
 //				asm volatile("NOP");
 				;
 			// switch moon off
-			PORTB &= moon.OffPORTA;
+			PORTA &= moon.OffPORTA;
+			PORTB &= moon.OffPORTB;
 			PORTC &= moon.OffPORTC;
 			PORTD &= moon.OffPORTD;
 		} else {
@@ -376,6 +383,7 @@ ISR(TIMER2_COMP_vect) {
 	// disable compare interrupt
 	TIMSK &= ~(1 << OCIE2);
 	PORTA &= moon.OffPORTA;
+	PORTB &= moon.OffPORTB;
 	PORTC &= moon.OffPORTC;
 	PORTD &= moon.OffPORTD;
 }

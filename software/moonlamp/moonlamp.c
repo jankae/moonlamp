@@ -4,13 +4,13 @@
 #include "eeprom.h"
 #include "ds1307.h"
 #include "systime.h"
-#include "touch.h"
+#include "encoder.h"
 
 int main(void) {
 	time_Init();
 	uart_init();
+	encoder_Init();
 	i2c_init();
-	touch_Init();
 	sei();
 
 	DS1307_Init();
@@ -92,52 +92,23 @@ int main(void) {
 	uint8_t brightness = 5;
 	uint8_t oldDay;
 	uint8_t on = 1;
-	uint8_t increasingBrightness = 1;
-	uint8_t holding = 0;
-	uint16_t changeTimeout;
 	uint16_t timeUpdateTimeout = time_SetTimeout(10000);
 	while (1) {
 		time_WaitMs(5);
-		touch_Update();
 		/*********************************
-		 * Step 1: Evaluate touch control
+		 * Step 1: Evaluate encoder control
 		 ********************************/
-		if (touch_Tapped()) {
-			on = !on;
-			if (on) {
-				uart_puts("Moonlamp on\n");
-			} else {
-				uart_puts("Moonlamp off\n");
-			}
-		} else if (touch_Holding()) {
-			if (!on) {
-				uart_puts("Moonlamp on\n");
-				on = 1;
-			}
-			if (!holding || time_TimeoutElapsed(changeTimeout)) {
-				// only change brightness every 200ms
-				changeTimeout = time_SetTimeout(200);
-				// sweep brightness
-				if (increasingBrightness) {
-					if (brightness < 10) {
-						brightness++;
-					} else {
-						increasingBrightness = 0;
-					}
-				} else {
-					if (brightness > 1) {
-						brightness--;
-					} else {
-						increasingBrightness = 1;
-					}
-				}
-				holding = 1;
-				uart_puts("New brightness: ");
-				uart_putInteger(brightness);
-				uart_putc('\n');
-			}
-		} else {
-			holding = 0;
+		int8_t enc = encoder_Update();
+		if (enc == 1 && brightness < 15) {
+			brightness++;
+			uart_puts("New brightness: ");
+			uart_putInteger(brightness);
+			uart_putc('\n');
+		} else if (enc == -1 && brightness > 0) {
+			brightness--;
+			uart_puts("New brightness: ");
+			uart_putInteger(brightness);
+			uart_putc('\n');
 		}
 		/*********************************
 		 * Step 2: get current date

@@ -18,9 +18,8 @@ DAY = $(shell date +%-d)
 MONTH = $(shell date +%-m)
 YEAR = $(shell date +%-Y)
 
-EFUSE = 0x07
-HFUSE = 0xD1
-LFUSE = 0xE2
+HFUSE = 0x91
+LFUSE = 0xE4
 
 ##########------------------------------------------------------##########
 ##########                   Makefile Magic!                    ##########
@@ -103,7 +102,7 @@ flash: clean $(TARGET).hex
 	$(AVRDUDE) -c $(PROGRAMMER_TYPE) -p $(MCU) $(PROGRAMMER_ARGS) -U flash:w:$(TARGET).hex
 
 fuses:
-	$(AVRDUDE) -c $(PROGRAMMER_TYPE) -p $(MCU) $(PROGRAMMER_ARGS) -u -U efuse:w:$(EFUSE):m -U hfuse:w:$(HFUSE):m -U lfuse:w:$(LFUSE):m
+	$(AVRDUDE) -c $(PROGRAMMER_TYPE) -p $(MCU) $(PROGRAMMER_ARGS) -u -U hfuse:w:$(HFUSE):m -U lfuse:w:$(LFUSE):m
 
 reset:
 	$(AVRDUDE) -c $(PROGRAMMER_TYPE) -p $(MCU) $(PROGRAMMER_ARGS)

@@ -94,9 +94,13 @@ void moon_init(void) {
 	MOON_ELEMENT11_DDR |= (1 << MOON_ELEMENT11_PIN);
 	MOON_ELEMENT12_DDR |= (1 << MOON_ELEMENT12_PIN);
 	MOON_ELEMENT13_DDR |= (1 << MOON_ELEMENT13_PIN);
+	MOON_ELEMENT14_DDR |= (1 << MOON_ELEMENT14_PIN);
+	MOON_ELEMENT15_DDR |= (1 << MOON_ELEMENT15_PIN);
+	MOON_ELEMENT16_DDR |= (1 << MOON_ELEMENT16_PIN);
+	MOON_ELEMENT17_DDR |= (1 << MOON_ELEMENT17_PIN);
 
 	// build 'switch-off'-masks
-	moon.MaskPORTB = 0xFF;
+	moon.MaskPORTA = 0xFF;
 	moon.MaskPORTC = 0xFF;
 	moon.MaskPORTD = 0xFF;
 	moon.MOON_ELEMENT1_PORT &= ~(1 << MOON_ELEMENT1_PIN);
@@ -112,17 +116,22 @@ void moon_init(void) {
 	moon.MOON_ELEMENT11_PORT &= ~(1 << MOON_ELEMENT11_PIN);
 	moon.MOON_ELEMENT12_PORT &= ~(1 << MOON_ELEMENT12_PIN);
 	moon.MOON_ELEMENT13_PORT &= ~(1 << MOON_ELEMENT13_PIN);
-	moon.OffPORTB = moon.MaskPORTB;
+	moon.MOON_ELEMENT14_PORT &= ~(1 << MOON_ELEMENT14_PIN);
+	moon.MOON_ELEMENT15_PORT &= ~(1 << MOON_ELEMENT15_PIN);
+	moon.MOON_ELEMENT16_PORT &= ~(1 << MOON_ELEMENT16_PIN);
+	moon.MOON_ELEMENT17_PORT &= ~(1 << MOON_ELEMENT17_PIN);
+	moon.OffPORTA = moon.MaskPORTA;
 	moon.OffPORTC = moon.MaskPORTC;
 	moon.OffPORTD = moon.MaskPORTD;
-	moon.MaskPORTB = 0;
+	moon.MaskPORTA = 0;
 	moon.MaskPORTC = 0;
 	moon.MaskPORTD = 0;
 
 	moon.brightness = 0;
 
-	TCCR2B |= (1 << CS22) | (1 << CS20);
-	TIMSK2 |= (1 << TOIE2);
+	/* prescaler of 128 -> about 244Hz PWM */
+	TCCR2 |= (1 << CS22) | (1 << CS20);
+	TIMSK |= (1 << TOIE2);
 }
 
 uint8_t moon_DaysBetweenDates(struct date date1, struct date date2) {
@@ -218,7 +227,7 @@ int8_t moon_calculateState(struct date date) {
 }
 
 void moon_SetElementsLeft(uint8_t elements) {
-	moon.MaskPORTB = 0;
+	moon.MaskPORTA = 0;
 	moon.MaskPORTC = 0;
 	moon.MaskPORTD = 0;
 	if (elements >= 1)
@@ -247,39 +256,55 @@ void moon_SetElementsLeft(uint8_t elements) {
 		moon.MOON_ELEMENT12_PORT |= (1 << MOON_ELEMENT12_PIN);
 	if (elements >= 13)
 		moon.MOON_ELEMENT13_PORT |= (1 << MOON_ELEMENT13_PIN);
+	if (elements >= 14)
+		moon.MOON_ELEMENT14_PORT |= (1 << MOON_ELEMENT14_PIN);
+	if (elements >= 15)
+		moon.MOON_ELEMENT15_PORT |= (1 << MOON_ELEMENT15_PIN);
+	if (elements >= 16)
+		moon.MOON_ELEMENT16_PORT |= (1 << MOON_ELEMENT16_PIN);
+	if (elements >= 17)
+		moon.MOON_ELEMENT17_PORT |= (1 << MOON_ELEMENT17_PIN);
 	uart_puts("Illuminating ");
 	uart_putInteger(elements);
 	uart_puts(" elements from the left\n");
 }
 void moon_SetElementsRight(uint8_t elements) {
-	moon.MaskPORTB = 0;
+	moon.MaskPORTA = 0;
 	moon.MaskPORTC = 0;
 	moon.MaskPORTD = 0;
 	if (elements >= 1)
-		moon.MOON_ELEMENT13_PORT |= (1 << MOON_ELEMENT13_PIN);
+		moon.MOON_ELEMENT17_PORT |= (1 << MOON_ELEMENT17_PIN);
 	if (elements >= 2)
-		moon.MOON_ELEMENT12_PORT |= (1 << MOON_ELEMENT12_PIN);
+		moon.MOON_ELEMENT16_PORT |= (1 << MOON_ELEMENT16_PIN);
 	if (elements >= 3)
-		moon.MOON_ELEMENT11_PORT |= (1 << MOON_ELEMENT11_PIN);
+		moon.MOON_ELEMENT15_PORT |= (1 << MOON_ELEMENT15_PIN);
 	if (elements >= 4)
-		moon.MOON_ELEMENT10_PORT |= (1 << MOON_ELEMENT10_PIN);
+		moon.MOON_ELEMENT14_PORT |= (1 << MOON_ELEMENT14_PIN);
 	if (elements >= 5)
-		moon.MOON_ELEMENT9_PORT |= (1 << MOON_ELEMENT9_PIN);
+		moon.MOON_ELEMENT13_PORT |= (1 << MOON_ELEMENT13_PIN);
 	if (elements >= 6)
-		moon.MOON_ELEMENT8_PORT |= (1 << MOON_ELEMENT8_PIN);
+		moon.MOON_ELEMENT12_PORT |= (1 << MOON_ELEMENT12_PIN);
 	if (elements >= 7)
-		moon.MOON_ELEMENT7_PORT |= (1 << MOON_ELEMENT7_PIN);
+		moon.MOON_ELEMENT11_PORT |= (1 << MOON_ELEMENT11_PIN);
 	if (elements >= 8)
-		moon.MOON_ELEMENT6_PORT |= (1 << MOON_ELEMENT6_PIN);
+		moon.MOON_ELEMENT10_PORT |= (1 << MOON_ELEMENT10_PIN);
 	if (elements >= 9)
-		moon.MOON_ELEMENT5_PORT |= (1 << MOON_ELEMENT5_PIN);
+		moon.MOON_ELEMENT9_PORT |= (1 << MOON_ELEMENT9_PIN);
 	if (elements >= 10)
-		moon.MOON_ELEMENT4_PORT |= (1 << MOON_ELEMENT4_PIN);
+		moon.MOON_ELEMENT8_PORT |= (1 << MOON_ELEMENT8_PIN);
 	if (elements >= 11)
-		moon.MOON_ELEMENT3_PORT |= (1 << MOON_ELEMENT3_PIN);
+		moon.MOON_ELEMENT7_PORT |= (1 << MOON_ELEMENT7_PIN);
 	if (elements >= 12)
-		moon.MOON_ELEMENT2_PORT |= (1 << MOON_ELEMENT2_PIN);
+		moon.MOON_ELEMENT6_PORT |= (1 << MOON_ELEMENT6_PIN);
 	if (elements >= 13)
+		moon.MOON_ELEMENT5_PORT |= (1 << MOON_ELEMENT5_PIN);
+	if (elements >= 14)
+		moon.MOON_ELEMENT4_PORT |= (1 << MOON_ELEMENT4_PIN);
+	if (elements >= 15)
+		moon.MOON_ELEMENT3_PORT |= (1 << MOON_ELEMENT3_PIN);
+	if (elements >= 16)
+		moon.MOON_ELEMENT2_PORT |= (1 << MOON_ELEMENT2_PIN);
+	if (elements >= 17)
 		moon.MOON_ELEMENT1_PORT |= (1 << MOON_ELEMENT1_PIN);
 	uart_puts("Illuminating ");
 	uart_putInteger(elements);
@@ -324,7 +349,7 @@ void moon_Error(uint8_t blink) {
 
 ISR(TIMER2_OVF_vect) {
 	if (moon.brightness > 0) {
-		PORTB |= moon.MaskPORTB;
+		PORTB |= moon.MaskPORTA;
 		PORTC |= moon.MaskPORTC;
 		PORTD |= moon.MaskPORTD;
 		if (moon.brightness < 20) {
@@ -333,24 +358,24 @@ ISR(TIMER2_OVF_vect) {
 //				asm volatile("NOP");
 				;
 			// switch moon off
-			PORTB &= moon.OffPORTB;
+			PORTB &= moon.OffPORTA;
 			PORTC &= moon.OffPORTC;
 			PORTD &= moon.OffPORTD;
 		} else {
 			// PWM duty cycle is high, waiting in interrupt takes too much time
 			// -> setup compare match interrupt
-			OCR2A = moon.brightness;
+			OCR2 = moon.brightness;
 			// clear compare match flag
-			TIFR2 = (1 << OCF2A);
+			TIFR = (1 << OCF2);
 			// enable interrupt
-			TIMSK2 |= (1 << OCIE2A);
+			TIMSK |= (1 << OCIE2);
 		}
 	}
 }
-ISR(TIMER2_COMPA_vect) {
+ISR(TIMER2_COMP_vect) {
 	// disable compare interrupt
-	TIMSK2 &= ~(1 << OCIE2A);
-	PORTB &= moon.OffPORTB;
+	TIMSK &= ~(1 << OCIE2);
+	PORTA &= moon.OffPORTA;
 	PORTC &= moon.OffPORTC;
 	PORTD &= moon.OffPORTD;
 }

@@ -27,14 +27,15 @@
 							</tool>
 							<tool id="de.innot.avreclipse.tool.compiler.winavr.base.1740928992" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.base">
 								<option id="de.innot.avreclipse.compiler.option.def.2112441203" name="Define Syms (-D)" superClass="de.innot.avreclipse.compiler.option.def" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="__AVR_ATmega328P__"/>
-								</option>
-								<option id="de.innot.avreclipse.compiler.option.undef.791189" name="Undefine Syms (-U)" superClass="de.innot.avreclipse.compiler.option.undef" valueType="undefDefinedSymbols">
 									<listOptionValue builtIn="false" value="__AVR_ATmega16__"/>
 								</option>
+								<option id="de.innot.avreclipse.compiler.option.undef.791189" name="Undefine Syms (-U)" superClass="de.innot.avreclipse.compiler.option.undef" valueType="undefDefinedSymbols"/>
 								<inputType id="de.innot.avreclipse.compiler.winavr.input.1267344157" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.cppcompiler.base.1552725236" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.base">
+								<option id="de.innot.avreclipse.cppcompiler.option.def.715049510" superClass="de.innot.avreclipse.cppcompiler.option.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="__AVR_ATmega16__"/>
+								</option>
 								<inputType id="de.innot.avreclipse.cppcompiler.input.1838913414" superClass="de.innot.avreclipse.cppcompiler.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.linker.winavr.base.1706104532" name="AVR C Linker" superClass="de.innot.avreclipse.tool.linker.winavr.base"/>

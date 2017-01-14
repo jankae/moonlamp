@@ -11,7 +11,7 @@
 #include <avr/io.h>
 #include "dates.h"
 
-#define UBRR_VAL 12 //9600baud@1MHz(U2X = 1)
+#define UBRR_VAL 103 //9600baud@8MHz(U2X = 1)
 
 void uart_init(void);
 void uart_putc(unsigned char c);

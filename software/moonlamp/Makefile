@@ -1,4 +1,4 @@
-MCU = atmega328p
+MCU = atmega16
 F_CPU = 8000000UL
 
 PROGRAMMER_TYPE = avrispmkII

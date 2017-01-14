@@ -9,69 +9,86 @@
 
 /*
  * Bits  7   6   5   4   3   2   1   0
- * PB    6   7   -   -   -   1   2   -
- * PC    -   -   -   -  11  12  13   -
- * PD    3   4   5   8   9  10   -   -
+ * PA   15  16  17   -   -   -   -   -
+ * PB    -   -   -   -   -   -   -   -
+ * PC   14  13  12  11  10   9   8   7
+ * PD    6   5   4   3   2   1   -   -
  */
-#define MOON_NUM_ELEMENTS		13
+#define MOON_NUM_ELEMENTS		17
 
-#define MOON_ELEMENT1_DDR		DDRB
-#define MOON_ELEMENT1_PORT		MaskPORTB
+#define MOON_ELEMENT1_DDR		DDRD
+#define MOON_ELEMENT1_PORT		MaskPORTD
 #define MOON_ELEMENT1_PIN		(2)
 
 #define MOON_ELEMENT2_DDR		DDRB
-#define MOON_ELEMENT2_PORT		MaskPORTB
-#define MOON_ELEMENT2_PIN		(1)
+#define MOON_ELEMENT2_PORT		MaskPORTD
+#define MOON_ELEMENT2_PIN		(3)
 
 #define MOON_ELEMENT3_DDR		DDRD
 #define MOON_ELEMENT3_PORT		MaskPORTD
-#define MOON_ELEMENT3_PIN		(7)
+#define MOON_ELEMENT3_PIN		(4)
 
 #define MOON_ELEMENT4_DDR		DDRD
 #define MOON_ELEMENT4_PORT		MaskPORTD
-#define MOON_ELEMENT4_PIN		(6)
+#define MOON_ELEMENT4_PIN		(5)
 
 #define MOON_ELEMENT5_DDR		DDRD
 #define MOON_ELEMENT5_PORT		MaskPORTD
-#define MOON_ELEMENT5_PIN		(5)
+#define MOON_ELEMENT5_PIN		(6)
 
-#define MOON_ELEMENT6_DDR		DDRB
-#define MOON_ELEMENT6_PORT		MaskPORTB
+#define MOON_ELEMENT6_DDR		DDRD
+#define MOON_ELEMENT6_PORT		MaskPORTD
 #define MOON_ELEMENT6_PIN		(7)
 
-#define MOON_ELEMENT7_DDR		DDRB
-#define MOON_ELEMENT7_PORT		MaskPORTB
-#define MOON_ELEMENT7_PIN		(6)
+#define MOON_ELEMENT7_DDR		DDRC
+#define MOON_ELEMENT7_PORT		MaskPORTC
+#define MOON_ELEMENT7_PIN		(0)
 
-#define MOON_ELEMENT8_DDR		DDRD
-#define MOON_ELEMENT8_PORT		MaskPORTD
-#define MOON_ELEMENT8_PIN		(4)
+#define MOON_ELEMENT8_DDR		DDRC
+#define MOON_ELEMENT8_PORT		MaskPORTC
+#define MOON_ELEMENT8_PIN		(1)
 
-#define MOON_ELEMENT9_DDR		DDRD
-#define MOON_ELEMENT9_PORT		MaskPORTD
-#define MOON_ELEMENT9_PIN		(3)
+#define MOON_ELEMENT9_DDR		DDRC
+#define MOON_ELEMENT9_PORT		MaskPORTC
+#define MOON_ELEMENT9_PIN		(2)
 
-#define MOON_ELEMENT10_DDR		DDRD
-#define MOON_ELEMENT10_PORT		MaskPORTD
-#define MOON_ELEMENT10_PIN		(2)
+#define MOON_ELEMENT10_DDR		DDRC
+#define MOON_ELEMENT10_PORT		MaskPORTC
+#define MOON_ELEMENT10_PIN		(3)
 
 #define MOON_ELEMENT11_DDR		DDRC
 #define MOON_ELEMENT11_PORT		MaskPORTC
-#define MOON_ELEMENT11_PIN		(3)
+#define MOON_ELEMENT11_PIN		(4)
 
 #define MOON_ELEMENT12_DDR		DDRC
 #define MOON_ELEMENT12_PORT		MaskPORTC
-#define MOON_ELEMENT12_PIN		(2)
+#define MOON_ELEMENT12_PIN		(5)
 
 #define MOON_ELEMENT13_DDR		DDRC
 #define MOON_ELEMENT13_PORT		MaskPORTC
-#define MOON_ELEMENT13_PIN		(1)
+#define MOON_ELEMENT13_PIN		(6)
+
+#define MOON_ELEMENT14_DDR		DDRC
+#define MOON_ELEMENT14_PORT		MaskPORTC
+#define MOON_ELEMENT14_PIN		(7)
+
+#define MOON_ELEMENT15_DDR		DDRA
+#define MOON_ELEMENT15_PORT		MaskPORTA
+#define MOON_ELEMENT15_PIN		(7)
+
+#define MOON_ELEMENT16_DDR		DDRA
+#define MOON_ELEMENT16_PORT		MaskPORTA
+#define MOON_ELEMENT16_PIN		(6)
+
+#define MOON_ELEMENT17_DDR		DDRA
+#define MOON_ELEMENT17_PORT		MaskPORTA
+#define MOON_ELEMENT17_PIN		(5)
 
 struct {
-	uint8_t MaskPORTB;
+	uint8_t MaskPORTA;
 	uint8_t MaskPORTC;
 	uint8_t MaskPORTD;
-	uint8_t OffPORTB;
+	uint8_t OffPORTA;
 	uint8_t OffPORTC;
 	uint8_t OffPORTD;
 	uint8_t brightness;

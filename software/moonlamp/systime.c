@@ -2,13 +2,13 @@
 
 void time_Init() {
 	// CTC-Mode
-	TCCR0A |= (1 << WGM01);
+	TCCR0 |= (1 << WGM01);
 	// Overflow at 124
-	OCR0A = 124;
-	// prescaler = 8
+	OCR0 = 124;
+	// prescaler = 64
 	// -> overflows every ms
-	TCCR0B |= (1 << CS01) | (1 << CS00);
-	TIMSK0 |= (1 << OCIE0A);
+	TCCR0 |= (1 << CS01) | (1<<CS00);
+	TIMSK |= (1 << OCIE0);
 }
 void time_WaitMs(uint16_t ms) {
 	uint16_t timeout = time_SetTimeout(ms);
@@ -33,6 +33,6 @@ uint8_t time_TimeoutElapsed(uint16_t timeout) {
 	return ret;
 }
 
-ISR(TIMER0_COMPA_vect) {
+ISR(TIMER0_COMP_vect) {
 	time.ms++;
 }

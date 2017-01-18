@@ -29,7 +29,7 @@
 								<option id="de.innot.avreclipse.compiler.option.def.2112441203" name="Define Syms (-D)" superClass="de.innot.avreclipse.compiler.option.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__AVR_ATmega16__"/>
 								</option>
-								<option id="de.innot.avreclipse.compiler.option.undef.791189" name="Undefine Syms (-U)" superClass="de.innot.avreclipse.compiler.option.undef" valueType="undefDefinedSymbols"/>
+								<option id="de.innot.avreclipse.compiler.option.undef.791189" name="Undefine Syms (-U)" superClass="de.innot.avreclipse.compiler.option.undef"/>
 								<inputType id="de.innot.avreclipse.compiler.winavr.input.1267344157" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.cppcompiler.base.1552725236" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.base">

@@ -8,6 +8,18 @@
 #include "systime.h"
 
 /*
+ * Changes in the PCB:
+ * - Move element 7 from PC0 (Pin 19) to PB5 (Pin 1)
+ * - Move element 8 from PC1 (Pin 20) to PD0 (Pin 9)
+ * - Detach left encoder PD0/PD1 (Pins 9/10)
+ * - Attach RTC module:
+ * 		- SCL on PC0 (Pin 19)
+ * 		- SDA on PC1 (Pin 20)
+ * 		- GND on GND
+ * 		- VCC on 5V
+ */
+
+/*
  * Bits  7   6   5   4   3   2   1   0
  * PA   15  16  17   -   -   -   -   -
  * PB    -   -   7   -   -   -   -   -

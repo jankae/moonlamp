@@ -1,16 +1,16 @@
 #include <avr/io.h>
 
-#include "moon.h"
 #include "eeprom.h"
 #include "ds1307.h"
 #include "systime.h"
-#include "touch.h"
+#include "world.h"
+#include "encoder.h"
 
 int main(void) {
+	Encoder_Init();
 	time_Init();
 	uart_init();
 	i2c_init();
-	touch_Init();
 	sei();
 
 	DS1307_Init();
@@ -62,119 +62,90 @@ int main(void) {
 	uart_putTime(time);
 	uart_putc('\n');
 
-	moon_init();
+	world_init();
 
 	// light up moon once to show device is working (it might be new moon)
 	// activate all elements
-	moon_SetElementsLeft(13);
+	world_EnableAll();
 	uint8_t i;
 	for (i = 0; i < 10; i++) {
-		moon_SetPWM(i * i);
+		world_SetPWM(i * i);
 		time_WaitMs(50);
 	}
-	moon_SetPWM(255);
+	world_SetPWM(255);
 	time_WaitMs(50);
 	for (i = 9; i > 0; i--) {
-		moon_SetPWM(i * i);
+		world_SetPWM(i * i);
 		time_WaitMs(50);
 	}
-	moon_SetPWM(0);
+	world_SetPWM(0);
 
 	// sanity check for RTC
 	if (date.year < 16) {
 		// can't be right, year must be at least 2016
 		uart_puts("ERROR: RTC invalid\n");
-		moon_Error(2);
+		world_Error(2);
 	}
 
-	moon_Update(date);
+	world_Update(time);
 
-	uint8_t brightness = 5;
-	uint8_t oldDay;
-	uint8_t on = 1;
-	uint8_t increasingBrightness = 1;
-	uint8_t holding = 0;
-	uint16_t changeTimeout;
+	int8_t brightness = 5;
+	uint8_t oldTime;
+	uint8_t timeTrackingMode = 0;
 	uint16_t timeUpdateTimeout = time_SetTimeout(10000);
 	while (1) {
-		time_WaitMs(5);
-		touch_Update();
+		time_WaitMs(50);
 		/*********************************
-		 * Step 1: Evaluate touch control
+		 * Step 1: Evaluate encoder control
 		 ********************************/
-		if (touch_Tapped()) {
-			on = !on;
-			if (on) {
-				uart_puts("Moonlamp on\n");
-			} else {
-				uart_puts("Moonlamp off\n");
-			}
-		} else if (touch_Holding()) {
-			if (!on) {
-				uart_puts("Moonlamp on\n");
-				on = 1;
-			}
-			if (!holding || time_TimeoutElapsed(changeTimeout)) {
-				// only change brightness every 200ms
-				changeTimeout = time_SetTimeout(200);
-				// sweep brightness
-				if (increasingBrightness) {
-					if (brightness < 10) {
-						brightness++;
-					} else {
-						increasingBrightness = 0;
-					}
-				} else {
-					if (brightness > 1) {
-						brightness--;
-					} else {
-						increasingBrightness = 1;
-					}
-				}
-				holding = 1;
-				uart_puts("New brightness: ");
-				uart_putInteger(brightness);
-				uart_putc('\n');
-			}
-		} else {
-			holding = 0;
+		brightness += Encoder_GetMovement();
+		if (brightness < 0) {
+			brightness = 0;
+		} else if (brightness > 16) {
+			brightness = 16;
+		}
+		if (Encoder_GetPress()) {
+			/* Switch mode, wait for encoder to be released */
+			timeTrackingMode = !timeTrackingMode;
+			while (Encoder_GetPress())
+				;
 		}
 		/*********************************
-		 * Step 2: get current date
+		 * Step 2: get current time
 		 ********************************/
-		if (time_TimeoutElapsed(timeUpdateTimeout)) {
-			oldDay = date.day;
-			DS1307_getDate(&date);
-			struct date date2;
-			DS1307_getDate(&date2);
-			if (date.day == date2.day && date.month == date2.month
-					&& date.year == date2.year) {
-				// both dates are the same
-				// -> probably no I2C transmission error
-				if (date.day >= 1 && date.day <= 31 && date.month >= 1
-						&& date.month <= 12 && date.year >= 16
-						&& date.year <= 99) {
-					// date seems to be valid
-					/*********************************
-					 * Step 3: Update moon state
-					 ********************************/
-					if (oldDay != date.day) {
-						moon_Update(date);
+		if (timeTrackingMode) {
+			if (time_TimeoutElapsed(timeUpdateTimeout)) {
+				oldTime = time.hour;
+				DS1307_getTime(&time);
+				struct time time2;
+				DS1307_getTime(&time2);
+				if (time.hour == time2.hour && time.minute == time2.minute
+						&& time.second == time2.second) {
+					// both dates are the same
+					// -> probably no I2C transmission error
+					if (time.hour <= 23 && time.minute < 60
+							&& time.second < 60) {
+						// date seems to be valid
+						/*********************************
+						 * Step 3: Update world state
+						 ********************************/
+						if (oldTime != time.hour) {
+							world_Update(time);
+						}
+						timeUpdateTimeout = time_SetTimeout(10000);
 					}
-					timeUpdateTimeout = time_SetTimeout(10000);
 				}
 			}
+		} else {
+			/* World is always completely on */
+			world_EnableAll();
 		}
 		/*********************************
 		 * Step 4: Set moon PWM
 		 ********************************/
-		if (on) {
-			uint16_t pwm = brightness * brightness;
-			if (pwm > 255)
-				pwm = 255;
-			moon_SetPWM(pwm);
-		} else {
-			moon_SetPWM(0);
-		}
+		uint16_t pwm = (uint8_t) brightness * (uint8_t) brightness;
+		if (pwm > 255)
+			pwm = 255;
+		world_SetPWM(pwm);
 	}
 }

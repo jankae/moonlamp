@@ -1,5 +1,5 @@
 MCU = atmega328p
-F_CPU = 8000000UL
+F_CPU = 1000000UL
 
 PROGRAMMER_TYPE = avrispmkII
 # extra arguments to avrdude: baud rate, chip type, -F flag, etc.

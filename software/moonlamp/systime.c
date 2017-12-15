@@ -1,5 +1,7 @@
 #include "systime.h"
 
+#include "encoder.h"
+
 void time_Init() {
 	// CTC-Mode
 	TCCR0A |= (1 << WGM01);
@@ -35,4 +37,5 @@ uint8_t time_TimeoutElapsed(uint16_t timeout) {
 
 ISR(TIMER0_COMPA_vect) {
 	time.ms++;
+	Encoder_Update();
 }

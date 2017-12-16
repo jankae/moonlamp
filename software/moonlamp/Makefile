@@ -1,5 +1,5 @@
 MCU = atmega328p
-F_CPU = 1000000UL
+F_CPU = 8000000UL
 
 PROGRAMMER_TYPE = avrispmkII
 # extra arguments to avrdude: baud rate, chip type, -F flag, etc.
@@ -18,7 +18,7 @@ DAY = $(shell date +%-d)
 MONTH = $(shell date +%-m)
 YEAR = $(shell date +%-Y)
 
-EFUSE = 0x07
+EFUSE = 0xFF
 HFUSE = 0xD1
 LFUSE = 0xE2
 

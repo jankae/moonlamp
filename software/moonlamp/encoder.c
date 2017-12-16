@@ -4,7 +4,7 @@
 
 static int8_t enc_delta;
 
-const int8_t table[16] = {0,0,-1,0,0,0,0,1,1,0,0,0,0,-1,0,0};
+const int8_t table[16] = {0,0,1,0,0,0,0,-1,-1,0,0,0,0,1,0,0};
 
 void Encoder_Init() {
 	/* Set as inputs */

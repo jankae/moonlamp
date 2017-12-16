@@ -8,7 +8,7 @@ void i2c_init(void) {
 }
 
 uint8_t i2c_get_byte(uint8_t ack) {
-	uint16_t timeout = time_SetTimeout(10);
+	uint16_t timeout = time_SetTimeout(100);
 	TWCR |= (1 << TWINT) | (1 << TWEA);
 	if (ack != 1)
 		TWCR &= ~(1 << TWEA);
@@ -17,7 +17,7 @@ uint8_t i2c_get_byte(uint8_t ack) {
 	return TWDR ;
 }
 uint8_t i2c_write_byte(uint8_t data) {
-	uint16_t timeout = time_SetTimeout(10);
+	uint16_t timeout = time_SetTimeout(100);
 	TWDR = data;
 	TWCR |= (1 << TWINT);
 	while (!(TWCR & (1 << TWINT)) && !time_TimeoutElapsed(timeout))
@@ -29,7 +29,7 @@ uint8_t i2c_write_byte(uint8_t data) {
 	return 0;
 }
 uint8_t i2c_start(void) {
-	uint16_t timeout = time_SetTimeout(10);
+	uint16_t timeout = time_SetTimeout(100);
 	//Start senden
 	TWCR |= (1 << TWINT) | (1 << TWSTA);
 	while (!(TWCR & (1 << TWINT)) && !time_TimeoutElapsed(timeout))
@@ -40,7 +40,7 @@ uint8_t i2c_start(void) {
 		return 0;
 }
 uint8_t i2c_address(uint8_t adr, uint8_t mode) {
-	uint16_t timeout = time_SetTimeout(10);
+	uint16_t timeout = time_SetTimeout(100);
 	//Slave-Adresse + Write senden
 	TWDR = (adr << 1) | mode;
 	TWCR &= ~(1 << TWSTA);

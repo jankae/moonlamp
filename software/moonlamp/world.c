@@ -33,6 +33,7 @@ void world_init(void) {
 
 	world.brightness = 0;
 
+	/* Prescaler = 64, results in 250Hz PWM frequency */
 	TCCR2B |= (1 << CS22) | (1 << CS20);
 	TIMSK2 |= (1 << TOIE2);
 }

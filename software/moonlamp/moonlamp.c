@@ -15,7 +15,7 @@ int main(void) {
 
 	DS1307_Init();
 
-	uart_puts("moonlamp V0.9 start\n");
+	uart_puts("worldlamp V0.9 start\n");
 	struct date date;
 	struct time time;
 	eeprom_Read(&date, &time);
@@ -66,6 +66,7 @@ int main(void) {
 
 	// light up moon once to show device is working (it might be new moon)
 	// activate all elements
+	uart_puts("Startup pattern...\n");
 	world_EnableAll();
 	uint8_t i;
 	for (i = 0; i < 10; i++) {
@@ -87,35 +88,52 @@ int main(void) {
 		world_Error(2);
 	}
 
+
 	world_Update(time);
 
+	uart_puts("Booting completed.\n");
+
 	int8_t brightness = 5;
-	uint8_t oldTime;
-	uint8_t timeTrackingMode = 0;
+	uint8_t oldTime = time.hour;
+	uint8_t timeTrackingMode = 1;
 	uint16_t timeUpdateTimeout = time_SetTimeout(10000);
 	while (1) {
 		time_WaitMs(50);
 		/*********************************
 		 * Step 1: Evaluate encoder control
 		 ********************************/
+		int8_t old = brightness;
 		brightness += Encoder_GetMovement();
 		if (brightness < 0) {
 			brightness = 0;
 		} else if (brightness > 16) {
 			brightness = 16;
 		}
+		if(old != brightness) {
+			uart_puts("New brightness:");
+			uart_putInteger(brightness);
+			uart_putc('\n');
+		}
 		if (Encoder_GetPress()) {
 			/* Switch mode, wait for encoder to be released */
 			timeTrackingMode = !timeTrackingMode;
+			/* set old hour invalid, forces update */
+			oldTime = 255;
+			timeUpdateTimeout = time_SetTimeout(0);
 			while (Encoder_GetPress())
 				;
+			uart_puts("Switched mode:");
+			if(timeTrackingMode) {
+				uart_puts("daytime/nighttime\n");
+			} else {
+				uart_puts("everything on\n");
+			}
 		}
 		/*********************************
 		 * Step 2: get current time
 		 ********************************/
 		if (timeTrackingMode) {
 			if (time_TimeoutElapsed(timeUpdateTimeout)) {
-				oldTime = time.hour;
 				DS1307_getTime(&time);
 				struct time time2;
 				DS1307_getTime(&time2);
@@ -131,9 +149,19 @@ int main(void) {
 						 ********************************/
 						if (oldTime != time.hour) {
 							world_Update(time);
+							oldTime = time.hour;
 						}
 						timeUpdateTimeout = time_SetTimeout(10000);
+						uart_puts("Updated world time:");
+						uart_putTime(time);
+						uart_putc('\n');
+					} else {
+						uart_puts("Invalid RTC reading: ");
+						uart_putTime(time);
+						uart_putc('\n');
 					}
+				} else {
+					uart_puts("Inconsistent RTC reading\n");
 				}
 			}
 		} else {

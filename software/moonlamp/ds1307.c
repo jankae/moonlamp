@@ -51,6 +51,7 @@ void DS1307_getTime(struct time *time) {
 	uint8_t second = i2c_get_byte(1);
 	uint8_t minute = i2c_get_byte(1);
 	uint8_t hour = i2c_get_byte(0);
+	i2c_stop();
 
 	//conversion from BCD
 	time->second = (second & 0x0F) + 10 * (second >> 4);
@@ -71,6 +72,7 @@ void DS1307_getDate(struct date *date) {
 	uint8_t day = i2c_get_byte(1);
 	uint8_t month = i2c_get_byte(1);
 	uint8_t year = i2c_get_byte(0);
+	i2c_stop();
 
 	//conversion from BCD
 	date->day = (day & 0x0F) + 10 * (day >> 4);
